@@ -1,0 +1,7 @@
+{
+	"name": "@packtrack/train",
+	"version": "1.0.0",
+	"dependencies": {
+		"@packtrack/layout": "^1.0.1"
+	}
+}
