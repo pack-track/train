@@ -1,4 +1,4 @@
-import { Train } from ".";
+import { Train } from "./train";
 import { SectionPosition } from "@packtrack/layout/position";
 import { PointPositioner } from "@packtrack/layout/positioner/point";
 
