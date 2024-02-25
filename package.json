@@ -1,7 +1,12 @@
 {
 	"name": "@packtrack/train",
 	"version": "1.0.1",
+	"main": ".built/index.js",
+	"typings": ".built/index.d.ts",
 	"dependencies": {
 		"@packtrack/layout": "^1.0.1"
+	},
+	"scripts": {
+		"prepare": "tsc"
 	}
 }
