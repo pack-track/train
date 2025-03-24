@@ -4,9 +4,10 @@
 	"main": ".built/index.js",
 	"typings": ".built/index.d.ts",
 	"dependencies": {
-		"@packtrack/layout": "^1.0.1"
+		"@packtrack/layout": "file:../layout"
 	},
 	"scripts": {
+		"build": "tsc",
 		"prepare": "tsc"
 	},
 	"devDependencies": {

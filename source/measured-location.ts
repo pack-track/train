@@ -1,26 +1,15 @@
-import { Train } from "./train";
-import { SectionPosition } from "@packtrack/layout/position";
-import { PointPositioner } from "@packtrack/layout/positioner/point";
+import { SectionPosition } from "@packtrack/layout";
 
 export class MeasuredPosition {
 	constructor(
 		public time: Date,
 		public location: SectionPosition,
-		public trainDirection: boolean,
+		public reversed: boolean,
 		public trainOffset: number
 	) {}
 
-	static fromPointPositionReading(positioner: PointPositioner, train: Train) {
-		return new MeasuredPosition(
-			new Date(),
-			positioner.position,
-			train.reversed,
-			0 // replace with location of the magnet later on
-		);
-	}
-
 	get head() {
-		if (this.trainDirection) {
+		if (this.reversed) {
 			return this.location.advance(-this.trainOffset);
 		}
 

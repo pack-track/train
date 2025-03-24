@@ -1,15 +1,83 @@
-import { Tile } from "@packtrack/layout/tile";
+import { SectionPosition, Span } from "@packtrack/layout";
 import { MeasuredPosition } from "./measured-location";
 import { PredictedPosition } from "./predicted-location";
+import { TrainIndex } from ".";
+import { Railcar } from "./railcar";
+import { Traction } from "./railcar/traction";
+import { SpeedPermit } from "./speed-permit";
 
 export class Train {
 	lastPositioner: MeasuredPosition;
 
-	length: number;
+	railcars: Railcar[] = [];
 
-	speed: number;
-	reversed: boolean;
-	maximalAcceleration: number;
+	speedPermits: SpeedPermit[] = [];
+
+	constructor(
+		public name: string,
+		public index: TrainIndex,
+		position: SectionPosition,
+		public reversed: boolean
+	) {
+		// convert the initial position into a measurement
+		// PackTrack msut assume that this data is correct
+		this.lastPositioner = new MeasuredPosition(new Date(), position, reversed, 0);
+
+		// set an empty speed permit until one is set
+		this.permit(0);
+	}
+
+	permit(speed: number, issued = new Date()) {
+		this.speedPermits.push(new SpeedPermit(issued, speed, this));
+	}
+
+	get length() {
+		let total = 0;
+
+		for (let railcar of this.railcars) {
+			total += railcar.length;
+		}
+
+		return total;
+	}
+
+	// the traction unit with the least acceleration
+	get maximalAcceleration() {
+		const accelerators: Traction[] = [];
+
+		for (let railcar of this.railcars) {
+			accelerators.push(...railcar.traction);
+		}
+
+		// trains without traction
+		if (accelerators.length == 0) {
+			return 0;
+		}
+
+		accelerators.sort((a, b) => a.maximalAcceleration - b.maximalAcceleration);
+
+		return accelerators[0].maximalAcceleration;
+	}
+
+	// average of all deccelerations
+	get maximumDeceleration() {
+		let total = 0;
+
+		for (let railcar of this.railcars) {
+			total += railcar.maximalDeceleration;
+		}
+
+		return total / this.railcars.length;
+	}
+
+	get currentSpeedPermit() {
+		return this.speedPermits.at(-1);
+	}
+
+	// speed the train should be going right now
+	get currentSpeed() {
+		return this.currentSpeedPermit.getSpeed();
+	}
 
 	// calculates the current head location based on the trains last known position measurement
 	get head() {
@@ -17,13 +85,35 @@ export class Train {
 			return;
 		}
 
-		const elapsedSeconds = (+new Date() - +this.lastPositioner.time) / 1000;
+		let distance = 0;
+
+		const firstPermit = this.speedPermits.findIndex(permit => permit.issued > this.lastPositioner.time) - 1;
+
+		for (let permitIndex = Math.max(firstPermit, 0); permitIndex < this.speedPermits.length; permitIndex++) {
+			const current = this.speedPermits[permitIndex];
+			const next = this.speedPermits[permitIndex + 1];
+
+			distance += current.getDistance(next?.issued ?? new Date());
+		}
+
+        const nominalHead = this.lastPositioner.head.advance(distance);
 
 		return new PredictedPosition(
 			this.lastPositioner.head,
-			this.lastPositioner.head.advance(this.speed * elapsedSeconds),
-			this.lastPositioner.head.advance(this.speed * elapsedSeconds + (this.maximalAcceleration * elapsedSeconds ** 2) / 2)
+			nominalHead,
+			nominalHead.advance(distance / 2)
 		);
+	}
+
+	get tail() {
+		const head = this.head;
+		const length = this.length;
+
+		return new PredictedPosition(
+			head.minimal.advance(-length),
+			head.nominal.advance(-length),
+			head.maximal.advance(-length)
+		)
 	}
 
 	nominalTrail() {
@@ -32,55 +122,19 @@ export class Train {
 		return head.section.trail(head.offset, this.reversed, this.length);
 	}
 
-	toSVG() {
-		const trail = this.nominalTrail();
-		const tiles: Tile[] = [];
+	// the range where the train could be
+	//
+	// there can only ever be one train in one span
+	// no route can ever change within this span
+	span() {
+		return Span.trail(this.tail.minimal, this.head.maximal);
+	}
 
-		let start = 0;
-		let end = 0;
+	dump() {
+		console.group(`Train '${this.name}'`);
+		console.log(`length: ${this.length}`);
+		console.log(`max acceleration: ${this.maximalAcceleration}`);
 
-		let length = 0;
-
-		for (let sectionIndex = 0; sectionIndex < trail.sections.length; sectionIndex++) {
-			const section = trail.sections[sectionIndex];
-
-			const range = section.getTilesInRange(this.head.nominal, trail.tip);
-
-			if (sectionIndex == 0) {
-				start = range.offset.start;
-			} else if (sectionIndex == trail.sections.length - 1) {
-				end = range.offset.end;
-			}
-			
-			for (let tile of range.tiles) {
-				length += tile.pattern.length;
-			}
-
-			tiles.unshift(...range.tiles);
-		}
-
-		const tip = tiles[tiles.length - 1];
-
-		return `
-			<g id="train">
-				<style>
-
-					g#train path {
-						stroke: blue;
-						stroke-dasharray: 0 ${start} ${length - end - start};
-
-						start: ${start};
-						end: ${end};
-					}
-
-				</style>
-
-				<text x="${tip.x}" y="${tip.y}" font-size="1">
-					TRAIN
-				</text>
-
-				<path d="${tiles.map((tile, index) => tile.toSVGPath(index != 0)).join(', ')}" />
-			</g>
-		`;
+		console.groupEnd();
 	}
 }
