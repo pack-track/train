@@ -3,6 +3,7 @@
 	"version": "1.0.3",
 	"main": ".built/index.js",
 	"typings": ".built/index.d.ts",
+	"sideEffects": false,
 	"dependencies": {
 		"@packtrack/layout": "file:../layout"
 	},
