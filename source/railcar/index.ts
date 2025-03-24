@@ -1,3 +1,4 @@
+import { Channel } from "@packtrack/layout";
 import { Train } from "../train";
 import { Coupler } from "./coupler";
 import { Traction } from "./traction";
@@ -9,6 +10,7 @@ export class Railcar {
 	} = {};
 
 	traction: Traction[] = [];
+	controllers: Channel[] = [];
 
 	constructor(
 		public name: string,

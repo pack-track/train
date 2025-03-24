@@ -1,4 +1,4 @@
-import { Layout, SectionPosition } from "@packtrack/layout";
+import { Device, Layout, SectionPosition } from "@packtrack/layout";
 import { CouplerType } from "./railcar/coupler-type";
 import { Train } from "./train";
 import { Railcar } from "./railcar";
@@ -117,6 +117,13 @@ export class TrainIndex {
 				);
 
 				railcar.coupler[child.getAttribute('side')] = coupler;
+			}
+
+			if (child.tagName == 'controller') {
+				const device = this.layout.findDevice(child.getAttribute('device'));
+				const channel = this.layout.findChannel(device, child.getAttribute('channel'));
+
+				railcar.controllers.push(channel);
 			}
 
 			child = child.nextSibling;
