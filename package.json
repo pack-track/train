@@ -4,14 +4,14 @@
 	"main": ".built/index.js",
 	"typings": ".built/index.d.ts",
 	"sideEffects": false,
-	"dependencies": {
-		"@packtrack/layout": "file:../layout"
-	},
 	"scripts": {
 		"build": "tsc",
-		"prepare": "tsc"
+		"preversion": "tsc"
 	},
 	"devDependencies": {
 		"typescript": "^5.3.3"
+	},
+	"dependencies": {
+		"@packtrack/layout": "^1.2.0"
 	}
 }

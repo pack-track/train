@@ -3,7 +3,8 @@
 		"outDir": ".built",
 		"module": "esnext",
 		"moduleResolution": "node",
-		"target": "esnext"
+		"target": "esnext",
+		"declaration": true
 	},
 	"include": [
 		"source"
