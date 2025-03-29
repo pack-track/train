@@ -1,7 +1,7 @@
-import { Channel } from "@packtrack/layout";
 import { Train } from "../train";
 import { Coupler } from "./coupler";
 import { Traction } from "./traction";
+import { Channel } from '@packtrack/layout';
 
 export class Railcar {
 	coupler: {

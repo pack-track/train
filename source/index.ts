@@ -1,7 +1,7 @@
-import { Device, Layout, SectionPosition } from "@packtrack/layout";
+import { Layout, SectionPosition } from "@packtrack/layout";
 import { CouplerType } from "./railcar/coupler-type";
 import { Train } from "./train";
-import { Railcar } from "./railcar";
+import { Railcar } from "./railcar/index";
 import { Traction } from "./railcar/traction";
 import { Coupler } from "./railcar/coupler";
 
@@ -48,7 +48,6 @@ export class TrainIndex {
 		}
 
 		let head: SectionPosition;
-		const railcars: Railcar[] = [];
 
 		let child = source.firstChild;
 

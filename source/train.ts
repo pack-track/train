@@ -129,12 +129,4 @@ export class Train {
 	span() {
 		return Span.trail(this.tail.minimal, this.head.maximal);
 	}
-
-	dump() {
-		console.group(`Train '${this.name}'`);
-		console.log(`length: ${this.length}`);
-		console.log(`max acceleration: ${this.maximalAcceleration}`);
-
-		console.groupEnd();
-	}
 }
