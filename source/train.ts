@@ -96,7 +96,7 @@ export class Train {
 			distance += current.getDistance(next?.issued ?? new Date());
 		}
 
-        const nominalHead = this.lastPositioner.head.advance(distance);
+		const nominalHead = this.lastPositioner.head.advance(distance);
 
 		return new PredictedPosition(
 			this.lastPositioner.head,
@@ -119,7 +119,7 @@ export class Train {
 	nominalTrail() {
 		const head = this.head.nominal;
 
-		return head.section.trail(head.offset, this.reversed, this.length);
+		return head.section.trail(head.offset, this.reversed, -this.length);
 	}
 
 	// the range where the train could be
