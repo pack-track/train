@@ -231,7 +231,7 @@ export class TrainChain {
 			const payload = new TextEncoder().encode(this.lastHash + chunk);
 			const hash = await crypto.subtle.digest('SHA-1', payload);
 
-			this.lastHash = new TextDecoder().decode(hash);
+			this.lastHash = btoa(String.fromCharCode(...new Uint8Array(hash)));
 		}
 
 		return this.lastHash;
