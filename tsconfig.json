@@ -6,7 +6,8 @@
 		"moduleResolution": "bundler",
 		"declaration": true,
 		"lib": [
-			"esnext"
+			"esnext",
+			"dom"
 		]
 	}
 }

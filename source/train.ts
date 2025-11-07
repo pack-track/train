@@ -1,21 +1,24 @@
 import { SectionPosition, Span } from "@packtrack/layout";
 import { MeasuredPosition } from "./measured-location";
 import { PredictedPosition } from "./predicted-location";
-import { TrainIndex } from ".";
 import { Railcar } from "./railcar";
 import { Traction } from "./railcar/traction";
 import { SpeedPermit } from "./speed-permit";
+import { Coupler } from "./railcar/coupler";
+import { TrainChain } from "./chain";
 
 export class Train {
 	lastPositioner: MeasuredPosition;
 
 	railcars: Railcar[] = [];
+	changed: Date;
 
 	speedPermits: SpeedPermit[] = [];
 
 	constructor(
-		public name: string,
-		public index: TrainIndex,
+		public identifier: string,
+		public chain: TrainChain,
+		public created: Date,
 		position: SectionPosition,
 		public reversed: boolean
 	) {
@@ -31,14 +34,34 @@ export class Train {
 		this.speedPermits.push(new SpeedPermit(issued, speed, this));
 	}
 
-	get length() {
-		let total = 0;
+	get railcarCount(): number {
+		return this.railcars.length;
+	}
 
-		for (let railcar of this.railcars) {
-			total += railcar.length;
+	get coupledLength(): number {
+		let sum = 0;
+
+		for (let unit of this.railcars) {
+			sum += unit.length;
 		}
 
-		return total;
+		return sum;
+	}
+
+	get headCoupler() {
+		return this.railcars.at(0).head.coupler;
+	}
+
+	get headCouplerType() {
+		return this.headCoupler?.type;
+	}
+
+	get tailCoupler() {
+		return this.railcars.at(-1).tail.coupler;
+	}
+
+	get tailCouplerType() {
+		return this.tailCoupler?.type;
 	}
 
 	// the traction unit with the least acceleration
@@ -107,7 +130,7 @@ export class Train {
 
 	get tail() {
 		const head = this.head;
-		const length = this.length;
+		const length = this.coupledLength;
 
 		return new PredictedPosition(
 			head.minimal.advance(-length),
@@ -119,7 +142,7 @@ export class Train {
 	nominalTrail() {
 		const head = this.head.nominal;
 
-		return head.section.trail(head.offset, this.reversed, -this.length);
+		return head.section.trail(head.offset, this.reversed, -this.coupledLength);
 	}
 
 	// the range where the train could be
@@ -128,5 +151,37 @@ export class Train {
 	// no route can ever change within this span
 	span() {
 		return Span.trail(this.tail.minimal, this.head.maximal);
+	}
+
+	split(coupler: Coupler) {
+		const targetHeadIndex = this.railcars.findIndex(unit => unit.head.coupler && unit.head.coupler == coupler);
+
+		if (targetHeadIndex != -1) {
+			return {
+				before: this.railcars.slice(0, targetHeadIndex),
+				after: this.railcars.slice(targetHeadIndex)
+			}
+		}
+
+		const targetTailIndex = this.railcars.findIndex(unit => unit.tail.coupler && unit.tail.coupler == coupler);
+
+		if (targetTailIndex != -1) {
+			return {
+				before: this.railcars.slice(0, targetTailIndex + 1),
+				after: this.railcars.slice(targetTailIndex + 1)
+			}
+		}
+
+		throw new Error(`Coupler of '${coupler.railcar.identifier}' not in train '${this.identifier}'`);
+	}
+
+	reverse() {
+		this.railcars.reverse();
+
+		for (let railcar of this.railcars) {
+			const coupler = railcar.head;
+			railcar.head = railcar.tail;
+			railcar.tail = coupler;
+		}
 	}
 }
