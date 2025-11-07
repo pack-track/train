@@ -22,6 +22,8 @@ export class Train {
 		position: SectionPosition,
 		public reversed: boolean
 	) {
+		this.changed = created;
+
 		// convert the initial position into a measurement
 		// PackTrack msut assume that this data is correct
 		this.lastPositioner = new MeasuredPosition(new Date(), position, reversed, 0);
