@@ -20,6 +20,7 @@ export class TrainChain {
 		this.hash('add', railcar.identifier);
 
 		const train = new Train(await this.createIdentifier(), this, time, null, false);
+		railcar.train = train;
 		train.railcars.push(railcar);
 
 		this.trains.push(train);
@@ -53,6 +54,7 @@ export class TrainChain {
 
 		this.hash('withdraw', railcar.identifier);
 
+		railcar.train = null;
 		train.railcars.splice(index, 1);
 
 		// disband empty train
@@ -107,6 +109,10 @@ export class TrainChain {
 		const train = new Train(await this.createIdentifier(), this, time, position, sourceTrain.reversed);
 		train.railcars = after;
 
+		for (let railcar of train.railcars) {
+			railcar.train = train;
+		}
+
 		this.trains.push(train);
 	}
 
@@ -120,7 +126,6 @@ export class TrainChain {
 		// find the source train and unit
 		const sourceUnit = this.railcars.find(railcar => railcar.headCoupler == source || railcar.tailCoupler == source);
 		const sourceTrain = this.trains.find(train => train.railcars.includes(sourceUnit));
-		sourceTrain.changed = time;
 
 		// find the target where this coupling attaches to
 		const targetUnit = this.railcars.find(railcar => railcar.headCoupler == target || railcar.tailCoupler == target);
@@ -132,6 +137,8 @@ export class TrainChain {
 		if (targetUnit.head.target && targetUnit.tail.target) {
 			throw new Error(`Target '${targetUnit.identifier}' is coupled (${targetUnit.head.target.identifier} / ${targetUnit.tail.target.identifier})`);
 		}
+
+		sourceTrain.changed = time;
 
 		const targetTrain = this.trains.find(train => train.railcars.includes(targetUnit));
 		targetTrain.changed = time;
@@ -188,6 +195,10 @@ export class TrainChain {
 
 		this.trains.splice(this.trains.indexOf(targetTrain), 1);
 		this.onDisband(targetTrain, targetTrain.railcars);
+
+		for (let railcar of sourceTrain.railcars) {
+			railcar.train = sourceTrain;
+		}
 	}
 
 	dump() {
