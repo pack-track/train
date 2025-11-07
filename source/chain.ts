@@ -229,7 +229,7 @@ export class TrainChain {
 	private async hash(...data: string[]) {
 		for (let chunk of data) {
 			const payload = new TextEncoder().encode(this.lastHash + chunk);
-			const hash = await crypto.subtle.digest('sha1', payload);
+			const hash = await crypto.subtle.digest("SHA-1", payload);
 
 			this.lastHash = new TextDecoder().decode(hash);
 		}
