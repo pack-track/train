@@ -34,7 +34,10 @@ export class Railcar {
 		// couplers, regardless of train arrangement
 		public headCoupler: Coupler,
 		public tailCoupler: Coupler
-	) {}
+	) {
+		this.head = { coupler: headCoupler };
+		this.tail = { coupler: tailCoupler };
+	}
 
 	get reversed() {
 		return this.headCoupler != this.head.coupler;
