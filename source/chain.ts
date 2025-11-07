@@ -1,3 +1,4 @@
+import { SectionPosition } from "@packtrack/layout";
 import { Railcar } from "./railcar";
 import { Coupler } from "./railcar/coupler";
 import { Train } from "./train";
@@ -16,10 +17,10 @@ export class TrainChain {
 	//
 	// each railcar quickly acts as a single train when being created
 	// it can be immediately coupled after being created
-	async comission(railcar: Railcar, time: Date) {
+	async comission(railcar: Railcar, position: SectionPosition, time: Date) {
 		this.hash('add', railcar.identifier);
 
-		const train = new Train(await this.createIdentifier(), this, time, null, false);
+		const train = new Train(await this.createIdentifier(), this, time, position, false);
 		railcar.train = train;
 		train.railcars.push(railcar);
 
