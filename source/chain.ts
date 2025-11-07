@@ -240,6 +240,16 @@ export class TrainChain {
 	private async createIdentifier() {
 		const hash = await this.hash('identifier');
 
-		return hash.substring(0, 6);
+		const identifier = hash
+			.replace(/[^A-Z0-9]/g, '') // remove special charactes
+			.replace(/[O0I1LJ]/g, '') // remove ambiguos characters
+			.substring(0, 6);
+
+		// regenerate in the very rare case that the identifier would be too small due to the removed characters
+		if (identifier.length < 6) {
+			return await this.createIdentifier();
+		}
+
+		return identifier;
 	}
 }
