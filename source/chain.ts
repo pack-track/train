@@ -64,7 +64,7 @@ export class TrainChain {
 			this.onDisband(train, [railcar]);
 		}
 
-		this.railcars.splice(this.railcars.indexOf(railcar));
+		this.railcars.splice(this.railcars.indexOf(railcar), 1);
 	}
 
 	// decouples two railcars
