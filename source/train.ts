@@ -26,7 +26,7 @@ export class Train {
 
 		// convert the initial position into a measurement
 		// PackTrack msut assume that this data is correct
-		this.lastPositioner = new MeasuredPosition(new Date(), position, reversed, 0);
+		this.lastPositioner = new MeasuredPosition(created, position, reversed, 0);
 
 		// set an empty speed permit until one is set
 		this.permit(0);
@@ -34,6 +34,18 @@ export class Train {
 
 	permit(speed: number, issued = new Date()) {
 		this.speedPermits.push(new SpeedPermit(issued, speed, this));
+	}
+
+	locate(position: SectionPosition, trainOffset: number, reversed: boolean, time = new Date()) {
+		this.lastPositioner = new MeasuredPosition(time, position, this.reversed, trainOffset);
+
+		// delete speed permits that were active before this measurement
+		// we no longer need them to calcualte the position
+		const lastRequiredSpeedPermit = this.speedPermits.findIndex(permit => permit.issued > time);
+
+		if (lastRequiredSpeedPermit > 0) {
+			this.speedPermits.splice(0, lastRequiredSpeedPermit - 1);
+		}
 	}
 
 	get railcarCount(): number {
