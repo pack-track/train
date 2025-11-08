@@ -191,6 +191,7 @@ export class Snapshot {
 							tailCoupler: null
 						});
 
+						train.railcars.push(railcar);
 						chain.railcars.push(railcar);
 
 						for (let side of ['head', 'tail']) {
