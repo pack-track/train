@@ -166,11 +166,14 @@ export class Snapshot {
 			train.lastPositioner = position;
 
 			for (let sourcePermit of source.querySelectorAll('speed-permits > speed-permit') as any) {
-				train.speedPermits.push(this.importItem(SpeedPermit, sourcePermit, {
+				const permit = this.importItem(SpeedPermit, sourcePermit, {
 					issued: Date,
 					speed: Number,
-					train: () => train
-				}));
+					train: null
+				});
+
+				permit.train = train;
+				train.speedPermits.push(permit);
 			}
 
 			chain.trains.push(train);
