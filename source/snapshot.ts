@@ -44,6 +44,7 @@ export class Snapshot {
 
 			this.exportItem(railcar, source,
 				'identifier',
+				'length',
 				'maximalSpeed',
 				'maximalDeceleration'
 			);
